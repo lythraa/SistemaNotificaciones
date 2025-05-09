@@ -1,9 +1,7 @@
 package co.edu.uniquindio.poo.sisnotificacion.model;
 
 import co.edu.uniquindio.poo.sisnotificacion.model.TemplateMethod.User;
-import co.edu.uniquindio.poo.sisnotificacion.model.strategy.NotificationContexto;
-import co.edu.uniquindio.poo.sisnotificacion.model.strategy.NotificationStrategy;
-
+import co.edu.uniquindio.poo.sisnotificacion.model.strategy.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,7 @@ public class SistemaNotificaciones {
         contexto.setStrategy(strategy);
     }
 
-    public void enviarNotificacion(String mensaje, Usuario destinatario) {
+    public void enviarNotificacion(String mensaje, User destinatario) {
         if (mensaje == null || mensaje.trim().isEmpty()) {
             throw new IllegalArgumentException("El mensaje no puede estar vacío");
         }

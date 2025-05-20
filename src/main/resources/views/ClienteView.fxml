@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.poo.sisnotificacion.controller.ClienteController"
+            prefWidth="360.0" prefHeight="670.0">
+    <VBox spacing="15.0" alignment="TOP_CENTER"
+          AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+        <padding>
+            <Insets top="20" left="15" right="15" bottom="20"/>
+        </padding>
+
+        <Label text="Centro de Notificaciones"
+               style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+        <VBox spacing="10">
+            <Label text="Canal preferido:"/>
+            <VBox spacing="5">
+                <RadioButton fx:id="radioEmail" text="Email"/>
+                <RadioButton fx:id="radioPush" text="Push"/>
+                <RadioButton fx:id="radioSMS" text="SMS"/>
+            </VBox>
+        </VBox>
+
+        <VBox spacing="10">
+            <Label text="Tipos de notificación:"/>
+            <VBox spacing="5">
+                <CheckBox fx:id="checkPromociones" text="Promociones"/>
+                <CheckBox fx:id="checkActualizaciones" text="Actualizaciones"/>
+                <CheckBox fx:id="checkAlertas" text="Alertas de seguridad"/>
+            </VBox>
+        </VBox>
+
+        <Button fx:id="btnGuardar" text="Guardar selección" maxWidth="150"/>
+
+        <VBox spacing="5">
+            <Label text="Notificaciones recibidas:"/>
+            <ListView fx:id="listaNotificaciones" prefHeight="180"/>
+        </VBox>
+
+        <Button fx:id="btnLimpiar" text="Limpiar notificaciones" maxWidth="160"/>
+
+        <Button fx:id="btnCerrarSesion" text="Cerrar sesión" maxWidth="150"/>
+    </VBox>
+</AnchorPane>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.poo.sisnotificacion.controller.AdminController"
+            prefWidth="400.0" prefHeight="600.0">
+    <VBox spacing="15.0" alignment="TOP_CENTER"
+          AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+        <padding>
+            <Insets top="20" left="15" right="15" bottom="20"/>
+        </padding>
+
+        <Label text="Panel de Administrador"
+               style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+        <VBox spacing="5">
+            <Label text="Correo del usuario destino:"/>
+            <TextField fx:id="campoCorreo" promptText="correo@ejemplo.com"/>
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Tipo de evento:"/>
+            <ComboBox fx:id="comboTipoEvento" promptText="Seleccione evento"/>
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Mensaje a enviar:"/>
+            <TextArea fx:id="areaMensaje" promptText="Escriba el mensaje..." prefRowCount="4" wrapText="true"/>
+        </VBox>
+
+        <Button fx:id="btnAgregarCola" text="Agregar a la cola" maxWidth="200"/>
+
+        <VBox spacing="5">
+            <Label text="Notificaciones en cola:"/>
+            <ListView fx:id="listaColaNotificaciones" prefHeight="200"/>
+        </VBox>
+
+        <Button fx:id="btnEnviarTodas" text="Enviar todas las notificaciones" maxWidth="240"/>
+    </VBox>
+</AnchorPane>

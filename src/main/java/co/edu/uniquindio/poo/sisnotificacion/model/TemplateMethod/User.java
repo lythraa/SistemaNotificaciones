@@ -1,10 +1,11 @@
 package co.edu.uniquindio.poo.sisnotificacion.model.TemplateMethod;
 
 
-import co.edu.uniquindio.poo.sisnotificacion.model.observer.EventListener;
+import co.edu.uniquindio.poo.sisnotificacion.model.observer.Observer;
+import co.edu.uniquindio.poo.sisnotificacion.model.observer.TipoEvento;
 import co.edu.uniquindio.poo.sisnotificacion.model.strategy.NotificationStrategy;
 
-public abstract class User implements EventListener {
+public abstract class User implements Observer {
     protected String nombre;
     protected String email;
     protected NotificationStrategy canal;
@@ -25,21 +26,16 @@ public abstract class User implements EventListener {
         return bloqueado;
     }
 
-    protected abstract String formatMessage(String evento, String mensaje);
+    public abstract String formatMessage(String mensaje);
 
-    public void actualizar(String evento, String mensaje) {
-        String mensajeFormateado = formatMessage(evento, mensaje);
-        canal.sendNotification(mensajeFormateado, email);
+    @Override
+    public void notify(TipoEvento evento, String mensaje) {
+        String mensajeFormateado = evento.toString()+": " + formatMessage(mensaje);
+        canal.sendNotification(mensajeFormateado);
     }
-
-    public abstract String formatearMensaje(String mensaje);
-
 
     public String getNombre() {
         return nombre;
     }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
 }
+

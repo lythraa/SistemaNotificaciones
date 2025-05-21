@@ -1,93 +1,145 @@
 package co.edu.uniquindio.poo.sisnotificacion.controller;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import co.edu.uniquindio.poo.sisnotificacion.model.RefrescarTodo;
+import co.edu.uniquindio.poo.sisnotificacion.model.SistemaNotificaciones;
+import co.edu.uniquindio.poo.sisnotificacion.model.TemplateMethod.User;
+import co.edu.uniquindio.poo.sisnotificacion.model.observer.TipoEvento;
+import co.edu.uniquindio.poo.sisnotificacion.model.strategy.EmailNotification;
+import co.edu.uniquindio.poo.sisnotificacion.model.strategy.PushNotification;
+import co.edu.uniquindio.poo.sisnotificacion.model.strategy.SMSNotification;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 
 public class ClienteController {
 
-    @FXML
-    private RadioButton radioEmail, radioPush, radioSMS;
+    private final SistemaNotificaciones sistema = SistemaNotificaciones.getInstancia();
+    private User clienteActual = SistemaNotificaciones.getInstancia().getClienteActual();
 
     @FXML
-    private CheckBox checkPromociones, checkActualizaciones, checkAlertas;
+    private ResourceBundle resources;
 
     @FXML
-    private Button btnGuardar, btnLimpiar, btnCerrarSesion;
+    private URL location;
+
+    @FXML
+    private CheckBox checkPromociones;
+
+    @FXML
+    private CheckBox checkActualizaciones;
+
+    @FXML
+    private CheckBox checkAlertas;
+
+    @FXML
+    private RadioButton radioPush;
+
+    @FXML
+    private RadioButton radioSMS;
 
     @FXML
     private ListView<String> listaNotificaciones;
 
-    private ToggleGroup grupoCanales;
-    private final ObservableList<String> notificacionesRecibidas = FXCollections.observableArrayList();
+    @FXML
+    private RadioButton radioEmail;
 
     @FXML
-    public void initialize() {
-        grupoCanales = new ToggleGroup();
-        radioEmail.setToggleGroup(grupoCanales);
-        radioPush.setToggleGroup(grupoCanales);
-        radioSMS.setToggleGroup(grupoCanales);
-
-        listaNotificaciones.setItems(notificacionesRecibidas);
-
-        btnGuardar.setOnAction(e -> guardarPreferencias());
-        btnLimpiar.setOnAction(e -> limpiarNotificaciones());
-        btnCerrarSesion.setOnAction(e -> cerrarSesion());
-
-        // Simulamos notificaciones recibidas (puedes eliminarlas)
-        notificacionesRecibidas.add("🎉 Promo especial para ti");
-        notificacionesRecibidas.add("🔐 Tu contraseña fue cambiada");
-    }
-
-    private void guardarPreferencias() {
-        String canal = obtenerCanalSeleccionado();
-        if (canal == null) {
-            mostrarAlerta("Selecciona un canal preferido.");
-            return;
+    void btnGuardar() {
+        // Seleccionar canal
+        if (radioEmail.isSelected()) {
+            clienteActual.setCanal(new EmailNotification());
+        } else if (radioSMS.isSelected()) {
+            clienteActual.setCanal(new SMSNotification());
+        } else if (radioPush.isSelected()) {
+            clienteActual.setCanal(new PushNotification());
         }
 
-        StringBuilder tipos = new StringBuilder();
-        if (checkPromociones.isSelected()) tipos.append("Promociones, ");
-        if (checkActualizaciones.isSelected()) tipos.append("Actualizaciones, ");
-        if (checkAlertas.isSelected()) tipos.append("Alertas de seguridad, ");
+        // Actualizar suscripciones: primero quitar todas para luego añadir
+        sistema.getEventManager().desuscribirTodosLosEventos(clienteActual);
 
-        if (tipos.length() == 0) {
-            mostrarAlerta("Selecciona al menos un tipo de notificación.");
-            return;
+        if (checkPromociones.isSelected()) {
+            sistema.getEventManager().suscribir(TipoEvento.PROMOCION, clienteActual);
+        }
+        if (checkActualizaciones.isSelected()) {
+            sistema.getEventManager().suscribir(TipoEvento.ACTUALIZACION_PERFIL, clienteActual);
+        }
+        if (checkAlertas.isSelected()) {
+            sistema.getEventManager().suscribir(TipoEvento.ALERTA_SEGURIDAD, clienteActual);
         }
 
-        String tiposStr = tipos.substring(0, tipos.length() - 2);
-
-        mostrarInfo("Preferencias guardadas:\nCanal: " + canal + "\nNotificaciones: " + tiposStr);
+        System.out.println("[INFO] Preferencias guardadas para: " + clienteActual.getNombre());
+        RefrescarTodo.refrescarTodo();
     }
 
-    private String obtenerCanalSeleccionado() {
-        if (radioEmail.isSelected()) return "Email";
-        if (radioPush.isSelected()) return "Push";
-        if (radioSMS.isSelected()) return "SMS";
-        return null;
+
+    @FXML
+    void btnLimpiarNotificaciones() {
+        listaNotificaciones.getItems().clear();
     }
 
-    private void limpiarNotificaciones() {
-        notificacionesRecibidas.clear();
-    }
 
-    private void cerrarSesion() {
-        mostrarInfo("Sesión cerrada.");
+    public void refrescarVista() {
+        clienteActual = sistema.getClienteActual(); // Actualizar referencia por si cambió
+
+        if (clienteActual.getCanal() instanceof EmailNotification) {
+            radioEmail.setSelected(true);
+        } else if (clienteActual.getCanal() instanceof SMSNotification) {
+            radioSMS.setSelected(true);
+        } else if (clienteActual.getCanal() instanceof PushNotification) {
+            radioPush.setSelected(true);
+        } else {
+            radioEmail.setSelected(false);
+            radioSMS.setSelected(false);
+            radioPush.setSelected(false);
         }
 
-    private void mostrarAlerta(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.WARNING);
-        alerta.setTitle("Advertencia");
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        checkPromociones.setSelected(sistema.getEventManager().obtenerSuscriptores(TipoEvento.PROMOCION).contains(clienteActual));
+        checkActualizaciones.setSelected(sistema.getEventManager().obtenerSuscriptores(TipoEvento.ACTUALIZACION_PERFIL).contains(clienteActual));
+        checkAlertas.setSelected(sistema.getEventManager().obtenerSuscriptores(TipoEvento.ALERTA_SEGURIDAD).contains(clienteActual));
+
+
+        listaNotificaciones.getItems().clear();
+        listaNotificaciones.getItems().addAll(clienteActual.getHistorialNotificaciones());
     }
 
-    private void mostrarInfo(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle("Información");
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+    @FXML
+    void initialize() {
+        assert checkPromociones != null;
+        assert checkActualizaciones != null;
+        assert checkAlertas != null;
+        assert radioPush != null;
+        assert radioSMS != null;
+        assert listaNotificaciones != null;
+        assert radioEmail != null;
+
+        ToggleGroup grupoCanal = new ToggleGroup();
+        radioEmail.setToggleGroup(grupoCanal);
+        radioSMS.setToggleGroup(grupoCanal);
+        radioPush.setToggleGroup(grupoCanal);
+
+        if (clienteActual.getCanal() instanceof EmailNotification) {
+            radioEmail.setSelected(true);
+        } else if (clienteActual.getCanal() instanceof SMSNotification) {
+            radioSMS.setSelected(true);
+        } else if (clienteActual.getCanal() instanceof PushNotification) {
+            radioPush.setSelected(true);
+        }
+
+        if (sistema.getEventManager().obtenerSuscriptores(TipoEvento.PROMOCION).contains(clienteActual)) {
+            checkPromociones.setSelected(true);
+        }
+        if (sistema.getEventManager().obtenerSuscriptores(TipoEvento.ACTUALIZACION_PERFIL).contains(clienteActual)) {
+            checkActualizaciones.setSelected(true);
+        }
+        if (sistema.getEventManager().obtenerSuscriptores(TipoEvento.ALERTA_SEGURIDAD).contains(clienteActual)) {
+            checkAlertas.setSelected(true);
+        }
+
     }
 }
+

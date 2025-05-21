@@ -20,5 +20,7 @@ public class SendNotificationCommand implements NotificationCommand {
         user.notify(evento, mensaje);
         System.out.println("[LOG] Enviando notificación a " + user.getNombre() +
                 " por evento " + evento + " con mensaje: " + mensaje);
+
+        user.agregarNotificacionAlHistorial("Tipo: "+evento + "mensaje: " + mensaje );
     }
 }

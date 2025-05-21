@@ -1,89 +1,85 @@
 package co.edu.uniquindio.poo.sisnotificacion.controller;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import co.edu.uniquindio.poo.sisnotificacion.model.RefrescarTodo;
+import co.edu.uniquindio.poo.sisnotificacion.model.SistemaNotificaciones;
+import co.edu.uniquindio.poo.sisnotificacion.model.TemplateMethod.AdminUser;
+import co.edu.uniquindio.poo.sisnotificacion.model.TemplateMethod.User;
+import co.edu.uniquindio.poo.sisnotificacion.model.command.NotificationInvoker;
+import co.edu.uniquindio.poo.sisnotificacion.model.command.SendNotificationCommand;
+import co.edu.uniquindio.poo.sisnotificacion.model.observer.TipoEvento;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 
 public class AdminController {
+
+    private final SistemaNotificaciones sistema = SistemaNotificaciones.getInstancia();
+    private final NotificationInvoker invoker = sistema.getInvoker();
+    private AdminUser adminActual = sistema.getAdminActual();
+    @FXML
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+    @FXML
+    private ComboBox<TipoEvento> comboTipoEvento;
+
+    @FXML
+    private TextArea campoMensaje;
 
     @FXML
     private TextField campoCorreo;
 
     @FXML
-    private ComboBox<String> comboTipoEvento;
-
-    @FXML
-    private TextArea areaMensaje;
-
-    @FXML
-    private Button btnAgregarCola;
-
-    @FXML
     private ListView<String> listaColaNotificaciones;
 
     @FXML
-    private Button btnEnviarTodas;
+    void btnAgregarCola() {
+        String correo = campoCorreo.getText();
+        TipoEvento tipo = comboTipoEvento.getValue();
+        String mensaje = campoMensaje.getText();
 
-    private final ObservableList<String> colaNotificaciones = FXCollections.observableArrayList();
+        User user = sistema.buscarUsuarioPorEmail(correo);
+        if (user == null) {
+            System.out.println("Usuario no encontrado");
+            return;
+        }
+
+        sistema.recibirEventoNotificacion(tipo, mensaje);
+        sistema.registrarMensajeDeAdmin(adminActual.getEmail(), mensaje);
+        listaColaNotificaciones.getItems().add("→ " + user.getNombre() + " | " + tipo + ": " + mensaje);
+
+        campoCorreo.clear();
+        campoMensaje.clear();
+        comboTipoEvento.getSelectionModel().clearSelection();
+    }
+
 
     @FXML
-    public void initialize() {
-        comboTipoEvento.setItems(FXCollections.observableArrayList(
-                "PROMOCION", "ACTUALIZACION_PERFIL", "ALERTA_SEGURIDAD"
-        ));
-
-        listaColaNotificaciones.setItems(colaNotificaciones);
-
-        btnAgregarCola.setOnAction(e -> agregarNotificacion());
-        btnEnviarTodas.setOnAction(e -> enviarNotificaciones());
-    }
-
-    private void agregarNotificacion() {
-        String correo = campoCorreo.getText();
-        String tipo = comboTipoEvento.getValue();
-        String mensaje = areaMensaje.getText();
-
-        if (correo.isEmpty() || tipo == null || mensaje.isEmpty()) {
-            mostrarAlerta("Por favor, completa todos los campos.");
-            return;
+    void btnEnviarTodasLasNotificaciones() {
+        if(!adminActual.isBloqueado()) {
+            sistema.getInvoker().ejecutarTodos();
+            listaColaNotificaciones.getItems().clear();
+            RefrescarTodo.refrescarTodo();
         }
-
-        String noti = "Para: " + correo + " | Tipo: " + tipo + " | Msg: " + mensaje;
-        colaNotificaciones.add(noti);
-
-        // Limpiar campos
-        campoCorreo.clear();
-        comboTipoEvento.setValue(null);
-        areaMensaje.clear();
-    }
-
-    private void enviarNotificaciones() {
-        if (colaNotificaciones.isEmpty()) {
-            mostrarAlerta("No hay notificaciones en cola.");
-            return;
+        else {
+            System.out.println("Admin bloqueado no se mandaran las notificaciones");
         }
-
-        // Aquí iría tu lógica real para enviar notificaciones
-        for (String noti : colaNotificaciones) {
-            System.out.println("ENVIANDO: " + noti);
-        }
-
-        colaNotificaciones.clear();
-        mostrarInfo("¡Notificaciones enviadas con éxito!");
     }
 
-    private void mostrarAlerta(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.WARNING);
-        alerta.setTitle("Advertencia");
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
-    }
+    @FXML
+    void initialize() {
+        comboTipoEvento.getItems().setAll(TipoEvento.values());
+        assert comboTipoEvento != null : "fx:id=\"comboTipoEvento\" was not injected: check your FXML file 'AdminView.fxml'.";
+        assert campoMensaje != null : "fx:id=\"campoMensaje\" was not injected: check your FXML file 'AdminView.fxml'.";
+        assert campoCorreo != null : "fx:id=\"campoCorreo\" was not injected: check your FXML file 'AdminView.fxml'.";
+        assert listaColaNotificaciones != null : "fx:id=\"listaColaNotificaciones\" was not injected: check your FXML file 'AdminView.fxml'.";
 
-    private void mostrarInfo(String mensaje) {
-        Alert info = new Alert(Alert.AlertType.INFORMATION);
-        info.setTitle("Información");
-        info.setContentText(mensaje);
-        info.showAndWait();
     }
 }

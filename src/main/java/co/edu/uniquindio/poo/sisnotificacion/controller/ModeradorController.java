@@ -1,70 +1,82 @@
 package co.edu.uniquindio.poo.sisnotificacion.controller;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import co.edu.uniquindio.poo.sisnotificacion.model.SistemaNotificaciones;
+import co.edu.uniquindio.poo.sisnotificacion.model.TemplateMethod.AdminUser;
+import co.edu.uniquindio.poo.sisnotificacion.model.TemplateMethod.ModeratorUser;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 
 public class ModeradorController {
 
-    @FXML
-    private ListView<String> listaNotificaciones;
+    private final SistemaNotificaciones sistema = SistemaNotificaciones.getInstancia();
+    private ModeratorUser moderatorUser = sistema.getModeradorActual();
 
     @FXML
-    private TextField campoCorreoAdmin;
+    private ResourceBundle resources;
+
+    @FXML
+    private URL location;
+
+    @FXML
+    private TextField campoCorreoAdminABloquear;
+
+    @FXML
+    private ListView<String> listaNotificacionesTotalesConCorreoDeAdministrador;
 
     @FXML
     private TextArea campoRazonBloqueo;
 
     @FXML
-    private Button btnBloquearAdmin;
-
-    private final ObservableList<String> notificaciones = FXCollections.observableArrayList();
-
-    @FXML
-    public void initialize() {
-        listaNotificaciones.setItems(notificaciones);
-
-        notificaciones.addAll(
-                "🔔 Actualización de perfil enviada a juan@mail.com",
-                "🔐 Alerta de seguridad para ana@mail.com",
-                "🎉 Promoción enviada a varios usuarios"
-        );
-
-        btnBloquearAdmin.setOnAction(e -> bloquearAdmin());
-    }
-
-    private void bloquearAdmin() {
-        String correoAdmin = campoCorreoAdmin.getText().trim();
+    void btnBloquearAdmin() {
+        String correo = campoCorreoAdminABloquear.getText().trim();
         String razon = campoRazonBloqueo.getText().trim();
 
-        if (correoAdmin.isEmpty()) {
-            mostrarAlerta("Debes ingresar el correo del administrador.");
+        if (correo.isEmpty() || razon.isEmpty()) {
+            System.out.println("[ERROR] Debes ingresar el correo y la razón del bloqueo.");
             return;
         }
 
-        if (razon.isEmpty()) {
-            mostrarAlerta("Debes ingresar una razón para el bloqueo.");
-            return;
+        boolean bloqueado = sistema.bloquearAdminPorCorreo(correo);
+
+        if (bloqueado) {
+            System.out.println("[MODERADOR] Se bloqueó al administrador con correo: " + correo);
+            System.out.println("[RAZÓN] " + razon);
+        } else {
+            System.out.println("[ERROR] No se encontró un administrador con ese correo.");
         }
-
-        mostrarInfo("Administrador " + correoAdmin + " bloqueado.\nRazón: " + razon);
-
-        campoCorreoAdmin.clear();
+        campoCorreoAdminABloquear.clear();
         campoRazonBloqueo.clear();
     }
 
-    private void mostrarAlerta(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.WARNING);
-        alerta.setTitle("Advertencia");
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+
+    @FXML
+    void initialize() {
+        assert campoCorreoAdminABloquear != null;
+        assert listaNotificacionesTotalesConCorreoDeAdministrador != null;
+        assert campoRazonBloqueo != null;
+
+        cargarMensajesDeAdmins();
     }
 
-    private void mostrarInfo(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle("Información");
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+    private void cargarMensajesDeAdmins() {
+        listaNotificacionesTotalesConCorreoDeAdministrador.getItems().clear();
+
+        sistema.getHistorialMensajesAdmins().forEach((correo, mensajes) -> {
+            listaNotificacionesTotalesConCorreoDeAdministrador.getItems().add(
+                    "▶ ADMIN: " + correo + " (" + mensajes.size() + " mensajes)");
+
+            for (String mensaje : mensajes) {
+                listaNotificacionesTotalesConCorreoDeAdministrador.getItems().add("   - " + mensaje);
+            }
+        });
+    }
+
+    public void refrescarVista() {
+        cargarMensajesDeAdmins();
     }
 }

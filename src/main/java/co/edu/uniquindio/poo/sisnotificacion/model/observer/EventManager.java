@@ -2,9 +2,11 @@ package co.edu.uniquindio.poo.sisnotificacion.model.observer;
 
 import java.util.*;
 
+//Clase que gestiona los eventos y suscripciones.
 public class EventManager implements Subject{
     private final Map<TipoEvento, List<Observer>> suscripciones = new HashMap<>();
 
+    //Permite a un usuario suscribirse a un evento.
     @Override
     public void suscribir(TipoEvento tipo, Observer observer) {
         suscripciones
@@ -12,9 +14,11 @@ public class EventManager implements Subject{
                 .add(observer);
     }
 
+    //Permite a un usuario desuscribirse de un evento.
     @Override
-    public void desuscribir(Observer observer) {
-        for (List<Observer> observers : suscripciones.values()) {
+    public void desuscribir(TipoEvento tipo, Observer observer) {
+        List<Observer> observers = suscripciones.get(tipo);
+        if (observers != null) {
             observers.remove(observer);
         }
     }
@@ -29,6 +33,11 @@ public class EventManager implements Subject{
         }
     }
 
+    public void desuscribirTodosLosEventos(Observer observer) {
+        for (List<Observer> observers : suscripciones.values()) {
+            observers.remove(observer);
+        }
+    }
     /**
      * Devuelve la lista de suscriptores para un tipo de evento específico.
      */

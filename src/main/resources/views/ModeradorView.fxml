@@ -1,40 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="co.edu.uniquindio.poo.sisnotificacion.controller.VistaModeradorController"
-            prefWidth="360.0" prefHeight="670.0">
-    <VBox spacing="15" alignment="TOP_CENTER"
-          AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0"
-          AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0">
+<AnchorPane prefHeight="670.0" prefWidth="360.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.sisnotificacion.controller.ModeradorController">
+    <VBox alignment="TOP_CENTER" spacing="15" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
         <padding>
-            <Insets top="20" left="15" right="15" bottom="20"/>
+            <Insets bottom="20" left="15" right="15" top="20"/>
         </padding>
 
-        <Label text="Panel del Moderador"
-               style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Panel del Moderador"/>
 
-        <VBox spacing="5" alignment="TOP_LEFT" prefHeight="350">
+        <VBox prefHeight="350" spacing="5">
             <Label text="Notificaciones y mensajes:"/>
-            <ListView fx:id="listaNotificaciones" prefHeight="350"/>
+            <ListView fx:id="listaNotificacionesTotalesConCorreoDeAdministrador" prefHeight="350"/>
         </VBox>
 
-        <VBox spacing="5" alignment="TOP_LEFT" maxWidth="300">
+        <VBox maxWidth="300" spacing="5">
             <Label text="Correo del administrador a bloquear:"/>
-            <TextField fx:id="campoCorreoAdmin" promptText="admin@ejemplo.com"/>
+            <TextField fx:id="campoCorreoAdminABloquear" promptText="admin@ejemplo.com"/>
         </VBox>
 
-        <VBox spacing="5" maxWidth="300">
+        <VBox maxWidth="300" spacing="5">
             <Label text="Motivo de bloqueo:"/>
-            <TextArea fx:id="campoRazonBloqueo" promptText="Describe el motivo..." prefRowCount="3"/>
+            <TextArea fx:id="campoRazonBloqueo" prefRowCount="3" promptText="Describe el motivo..."/>
         </VBox>
 
-        <Button fx:id="btnBloquearAdmin" text="Bloquear Administrador"
-                style="-fx-background-color: #a80000; -fx-text-fill: white;" maxWidth="200"/>
-
+        <Button maxWidth="200" onAction="#btnBloquearAdmin"
+                style="-fx-background-color: #a80000; -fx-text-fill: white;" text="Bloquear Administrador"/>
     </VBox>
 </AnchorPane>
